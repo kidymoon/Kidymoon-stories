@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>کفش‌های شب‌گرد</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff8ea;--ink:#1d2350;--card:#fff;--line:#e6dcc4;--coral:#ff7a8a;--mint:#6fd6b8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161a44;--ink:#fff4d6;--card:#232964;--line:#3b4390}}
+:root[data-theme="dark"]{--bg:#161a44;--ink:#fff4d6;--card:#232964;--line:#3b4390}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,sans-serif;line-height:2}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:26px;font-weight:900;margin:8px 0 12px;text-align:center}
+svg{width:100%;height:auto;border-radius:24px;display:block}
+.txt{background:var(--card);border:3px solid var(--line);border-radius:24px;padding:16px 20px;margin-top:12px;font-size:21px;min-height:150px}
+.txt p{margin:0 0 6px}
+.ref{margin-top:10px;padding-right:12px;border-right:5px solid var(--coral);font-weight:700}
+.nav{display:flex;gap:10px;margin-top:12px}
+.nav button{flex:1;font:inherit;font-weight:700;font-size:18px;padding:12px;border-radius:20px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:52px}
+.nav button.m{background:var(--mint);border-color:var(--mint);color:#0f3b30}
+.nav button:disabled{opacity:.4}
+button:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}
+.lg{font:inherit;font-weight:700;font-size:15px;padding:6px 16px;border-radius:16px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.d{text-align:center;opacity:.7;margin-top:8px}
+@media (prefers-reduced-motion:no-preference){.st{transform-box:fill-box;transform-origin:50% 100%;animation:step 1.8s ease-in-out infinite}}
+@keyframes step{0%,45%,100%{transform:none}15%{transform:translateY(-5px) rotate(-4deg)}}
+</style>
+</head>
+<body>
+<main>
+<button id="lg" class="lg">English</button>
+<h1 id="h">👟 کفش‌های شب‌گرد</h1>
+<div id="art"></div>
+<div class="txt" id="txt" aria-live="polite"></div>
+<div class="d" id="d"></div>
+<div class="nav"><button id="nx" class="m">بعدی</button><button id="pv">قبلی</button></div>
+</main>
+<script>
+var R1="تاپ تاپ تاپ تاپ، چپ و راست،<br>کفش‌ها رفتن، چی اونجاست؟";
+var PF=[
+{t:["شب شد. کیدی مون خوابید. دو کفش کنار در ماندند، کفش چپ و کفش راست.","کفش چپ چشمکی زد. کفش راست چشمکی زد.","«بریم قدم بزنیم؟» «بریم!»"],r:R1},
+{t:["کفش‌ها به باغ رفتند. علف‌ها نرم و خیس بودند و یک گل بنفش هم آنجا بود.","کفش‌ها خم شدند و بو کردند: «هوووم... چه بوی خوبی!»","علف‌ها قلقلک دادند: «هی‌هی‌هی!»"],r:R1},
+{t:["جلوتر یک چاله‌ی آب بود.","شَلپ! کفش چپ پرید. شَلپ! کفش راست پرید.","آب همه‌جا پاشید. چه بازی‌ای!"],r:R1},
+{t:["یک صدای بلند آمد: قور قور!","یک قورباغه‌ی سبز روی برگ نشسته بود.","«سلام کفش‌ها!» «سلام قورباغه!»"],r:R1},
+{t:["کفش‌ها بالا را نگاه کردند. ماه گرد و زرد بود.","بعد پایین را نگاه کردند. توی چاله هم یک ماه بود!","دو ماه! کفش‌ها دست تکان دادند: «سلام ماه!»"],r:""},
+{t:["کنار چاله یک توت قرمز کوچولو بود.","کفش چپ نوک زبانش را به آن زد.","«همممم... چه شیرینه!»"],r:""},
+{t:["کفش چپ خمیازه کشید: «هااااا...»","کفش راست هم خمیازه کشید: «هااااا...»","وقت خواب بود."],r:"تاپ تاپ تاپ تاپ، چپ و راست،<br>کفش‌ها میان، خونه اینجاست!"},
+{t:["کفش‌ها آرام آمدند و کنار در نشستند. یک برگ سبز به ته کفش چپ چسبیده بود و ته کفش راست هنوز کمی خیس بود.","صبح شد. کیدی مون کفش‌هایش را پوشید. «اوه! این برگ از کجا آمده؟ چرا کفش‌هایم خیس‌اند؟»","کفش‌ها یواش با هم گفتند:"],r:"تاپ تاپ تاپ تاپ، چپ و راست،<br>این یک رازه، راز ماست!",e:"کیدی مون خندید و گفت: «راستی شب‌ها هم مراقب خودتون باشید!» بعد رفت بازی. و شب بعد، کفش‌ها دوباره چشمکی زدند. شب‌بخیر، کیدی مون. شب‌بخیر، کفش‌ها."}
+];
+
+var E1="Tap-tap-tap-tap, left and right,<br>Shoes went walking... what's in sight?";
+var PE=[
+{t:["Night came. Kiddy Moon fell asleep. Two shoes stayed by the door, the left shoe and the right shoe.","The left shoe winked. The right shoe winked.","“Shall we go for a walk?” “Let’s go!”"],r:E1},
+{t:["The shoes went to the garden. The grass was soft and wet, and there was a purple flower.","The shoes bent down and sniffed: “Mmmm... what a lovely smell!”","The grass tickled them: “Hee-hee-hee!”"],r:E1},
+{t:["Up ahead there was a puddle.","Splash! The left shoe jumped. Splash! The right shoe jumped.","Water went everywhere. What fun!"],r:E1},
+{t:["A sound came: Ribbit! Ribbit!","A green frog sat on a leaf.","“Hello, shoes!” “Hello, frog!”"],r:E1},
+{t:["The shoes looked up. The moon was round and yellow.","Then they looked down. There was a moon in the puddle too!","Two moons! The shoes waved: “Hello, moon!”"],r:""},
+{t:["Next to the puddle was a tiny red berry.","The left shoe touched it with the tip of its tongue.","“Mmmm... how sweet!”"],r:""},
+{t:["The left shoe yawned: “Haaaa...”","The right shoe yawned too: “Haaaa...”","It was time for bed."],r:"Tap-tap-tap-tap, left and right,<br>Shoes come home... here's the door in sight!"},
+{t:["The shoes tiptoed back and sat by the door. A green leaf was stuck to the left shoe, and the right shoe was still a little wet.","Morning came. Kiddy Moon put on the shoes. “Oh! Where did this leaf come from? Why are my shoes wet?”","The shoes whispered together:"],r:"Tap-tap-tap-tap, left and right,<br>It's a secret... shh, good night!",e:"Kiddy Moon laughed and said, “By the way, take care of yourselves at night too!” Then he went out to play. And the next night, the shoes winked again. Good night, Kiddy Moon. Good night, shoes."}
+];
+var sc=0;function shoe(x,y,c,o){o=o||{};return '<g transform="translate('+x+','+y+')"><g class="st" style="animation-delay:'+((sc++%2)*.9)+'s"><rect x="0" y="18" width="64" height="12" rx="6" fill="#fff"/><path d="M4 18Q4 -2 26 0Q34 12 54 12Q64 14 62 18z" fill="'+c+'"/><circle cx="16" cy="10" r="4" fill="#fff"/><circle cx="28" cy="10" r="4" fill="#fff"/><circle cx="16" cy="10.5" r="1.8" fill="#1d2350"/><circle cx="28" cy="10.5" r="1.8" fill="#1d2350"/>'+(o.yawn?'<ellipse cx="42" cy="22" rx="6" ry="4" fill="#1d2350"/>':'')+'</g></g>'}
+function moon(x,y,r){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#ffd66b"/><circle cx="'+(x-r/3)+'" cy="'+(y-r/4)+'" r="'+r/5+'" fill="#f5c04a"/>'}
+function stars(){var s="";[[40,30],[110,60],[330,40],[270,90],[70,100],[370,110]].forEach(function(p){s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="#fff8ea"/>'});return s}
+function grass(c){var s='<rect y="170" width="400" height="70" fill="'+(c||"#2f8f6b")+'"/>';for(var i=10;i<400;i+=38)s+='<path d="M'+i+' 172l4-14 4 14 4-10 3 10" stroke="#6fd6b8" stroke-width="3" fill="none"/>';return s}
+function puddle(){return '<ellipse cx="200" cy="200" rx="95" ry="20" fill="#5aa9e6"/>'}
+function svg(inner,sky){return '<svg viewBox="0 0 400 240" role="img" aria-hidden="true"><rect width="400" height="240" fill="'+(sky||"#1d2350")+'"/>'+inner+'</svg>'}
+var S=[
+function(){return svg(stars()+moon(330,50,26)+grass()+'<rect x="150" y="70" width="100" height="100" rx="8" fill="#8a5a3c"/><circle cx="235" cy="125" r="5" fill="#ffd66b"/>'+shoe(100,140,"#ff7a8a")+shoe(230,140,"#6fd6b8"))},
+function(){return svg(stars()+moon(60,45,24)+grass()+'<path d="M290 170v-40" stroke="#6fd6b8" stroke-width="5"/><circle cx="290" cy="122" r="16" fill="#8b5cf6"/><circle cx="290" cy="122" r="6" fill="#ffd66b"/>'+shoe(90,140,"#ff7a8a")+shoe(180,142,"#6fd6b8"))},
+function(){return svg(stars()+moon(340,45,24)+grass()+puddle()+'<circle cx="150" cy="150" r="5" fill="#8fd0ff"/><circle cx="250" cy="145" r="6" fill="#8fd0ff"/><circle cx="200" cy="130" r="4" fill="#8fd0ff"/>'+shoe(110,90,"#ff7a8a")+shoe(220,90,"#6fd6b8"))},
+function(){return svg(stars()+moon(50,45,22)+grass()+'<ellipse cx="290" cy="178" rx="45" ry="12" fill="#22a06b"/><ellipse cx="290" cy="160" rx="28" ry="20" fill="#3fbf6f"/><circle cx="276" cy="142" r="8" fill="#3fbf6f"/><circle cx="304" cy="142" r="8" fill="#3fbf6f"/><circle cx="276" cy="141" r="3" fill="#1d2350"/><circle cx="304" cy="141" r="3" fill="#1d2350"/><path d="M280 162q10 8 20 0" stroke="#1d2350" stroke-width="3" fill="none"/>'+shoe(80,140,"#ff7a8a")+shoe(160,142,"#6fd6b8"))},
+function(){return svg(stars()+moon(200,55,38)+grass()+puddle()+'<circle cx="200" cy="200" r="12" fill="#ffd66b" opacity=".8"/>'+shoe(60,140,"#ff7a8a")+shoe(280,140,"#6fd6b8"))},
+function(){return svg(stars()+moon(60,45,24)+grass()+'<circle cx="260" cy="150" r="20" fill="#e5484d"/><path d="M260 132q8-12 18-8" stroke="#22a06b" stroke-width="5" fill="none"/>'+shoe(90,140,"#ff7a8a")+shoe(170,142,"#6fd6b8"))},
+function(){return svg(stars()+moon(320,110,30)+grass()+shoe(100,140,"#ff7a8a",{yawn:1})+shoe(210,140,"#6fd6b8",{yawn:1})+'<text x="175" y="110" font-size="22" fill="#fff8ea">z z z</text>')},
+function(){return svg('<circle cx="330" cy="50" r="30" fill="#ffd66b"/>'+grass("#3fae7f")+'<rect x="150" y="70" width="100" height="100" rx="8" fill="#8a5a3c"/><circle cx="235" cy="125" r="5" fill="#ffd66b"/>'+shoe(100,140,"#ff7a8a")+shoe(230,140,"#6fd6b8")+'<path d="M112 150q6-10 14-6-4 10-14 6z" fill="#3fbf6f"/>',"#8fd0ff")}
+];
+var L="fa",i=0,$=function(x){return document.getElementById(x)};
+var T={fa:["👟 کفش‌های شب‌گرد","بعدی","قبلی","از اول بخوان","از","English"],en:["👟 The Night-Walking Shoes","Next","Previous","Read again","of","فارسی"]};
+function show(){var en=L==="en",P=en?PE:PF,p=P[i],t=T[L];
+document.documentElement.lang=L;document.documentElement.dir=en?"ltr":"rtl";document.title=t[0].slice(3);
+$("h").textContent=t[0];$("lg").textContent=t[5];$("pv").textContent=t[2];
+document.querySelector(".nav").style.flexDirection=en?"row-reverse":"row";
+$("art").innerHTML=S[i]();
+var h=p.t.map(function(l){return"<p>"+l+"</p>"}).join("");if(p.r)h+='<div class="ref">'+p.r+"</div>";if(p.e)h+="<p>"+p.e+"</p>";
+$("txt").innerHTML=h;$("d").textContent=(i+1)+" "+t[4]+" "+P.length;$("pv").disabled=i===0;$("nx").textContent=i===P.length-1?t[3]:t[1]}
+$("nx").onclick=function(){i=i===PF.length-1?0:i+1;show()};
+$("pv").onclick=function(){if(i>0){i--;show()}};
+$("lg").onclick=function(){L=L==="fa"?"en":"fa";show()};
+show();
+</script>
+</body>
+</html>
