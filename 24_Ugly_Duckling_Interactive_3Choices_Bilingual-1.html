@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ugly Duckling Interactive | جوجه‌اردک زشت تعاملی</title>
+<style>
+  :root{
+    --ink:#2E3A3F; --ink-soft:#5B6B70; --card:#FFFFFF;
+    --coral:#F0876B; --sun:#FFD873; --sun-deep:#F0A93B;
+    --water-deep:#8FC1D6; --purple:#9C7FB0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:Tahoma, 'Segoe UI', sans-serif;
+    background:linear-gradient(180deg,#FFF6E5 0%,#C3E4F5 55%,#CDEADB 100%);
+    min-height:100vh; display:flex; justify-content:center; padding:20px 14px;
+  }
+  .stage{ width:100%; max-width:480px; }
+  .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .title{ font-size:19px; font-weight:700; color:var(--ink); line-height:1.5; }
+  .title .sub{ display:block; font-size:12px; font-weight:400; color:var(--ink-soft); }
+  button.langToggle{
+    font-family:Tahoma, sans-serif; font-size:14px; font-weight:700; color:var(--ink);
+    background:#fff; border:2px solid var(--sun-deep); border-radius:999px;
+    padding:8px 16px; cursor:pointer; white-space:nowrap; transition:transform .12s ease;
+  }
+  button.langToggle:active{ transform:scale(0.95); }
+  .progress-wrap{ margin-bottom:12px; }
+  .progress-bar{ width:100%; height:6px; background:#ffffff80; border-radius:999px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--coral); border-radius:999px; transition:width .3s ease; }
+  .progress-label{ font-size:12px; color:var(--ink-soft); margin-top:4px; text-align:center; }
+  .scene-card{
+    background:var(--card); border-radius:28px; padding:0; overflow:hidden;
+    box-shadow:0 10px 30px rgba(46,58,63,0.12); animation:pop .35s ease;
+  }
+  @keyframes pop{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .stage-svg{ display:block; width:100%; height:auto; }
+  .body-pad{ padding:22px 22px 24px; }
+  .back-row{ display:flex; justify-content:flex-start; margin-bottom:10px; }
+  button.backBtn{
+    font-family:Tahoma, 'Segoe UI', sans-serif; font-size:14px; font-weight:700; color:var(--ink-soft);
+    background:#EFEFEF; border:none; border-radius:999px; padding:9px 16px; cursor:pointer;
+    transition:transform .12s ease;
+  }
+  button.backBtn:active{ transform:scale(0.95); }
+  .badge{
+    display:inline-block; font-size:13px; font-weight:700; color:#5C8F49;
+    background:#EAF3E2; padding:5px 14px; border-radius:999px; margin-bottom:14px;
+  }
+  .story-text{ font-size:18px; font-weight:600; line-height:1.95; color:#1F2A2E; margin:0 0 20px; }
+  .question{ font-size:16px; font-weight:700; color:var(--ink); margin-bottom:14px; }
+  .choices{ display:flex; flex-direction:column; gap:12px; }
+  button.choice{
+    font-family:Tahoma, 'Segoe UI', sans-serif; font-size:16px; font-weight:500; color:var(--ink);
+    background:var(--sun); border:none; border-radius:18px; padding:16px 18px;
+    cursor:pointer; transition:transform .12s ease, background .12s ease;
+  }
+  html[dir="rtl"] button.choice{ text-align:right; }
+  html[dir="ltr"] button.choice{ text-align:left; }
+  button.choice:active{ transform:scale(0.97); background:var(--sun-deep); }
+  button.choice.alt{ background:var(--water-deep); color:#fff; }
+  button.choice.alt:active{ background:#6EA5BC; }
+  .next-wrap{ display:flex; justify-content:center; }
+  button.next{
+    font-family:Tahoma, 'Segoe UI', sans-serif; font-size:16px; font-weight:700; color:#fff;
+    background:var(--coral); border:none; border-radius:999px; padding:15px 38px; cursor:pointer;
+    transition:transform .12s ease;
+  }
+  button.next:active{ transform:scale(0.96); }
+  button.next.restart{ background:var(--purple); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="topbar">
+    <div class="title" id="titleBox"></div>
+    <button class="langToggle" onclick="toggleLang()" id="langBtn">EN</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+  <div id="card" class="scene-card"></div>
+</div>
+
+<script>
+let lang = "fa";
+const TOTAL_STEPS = 16;
+
+const ui = {
+  fa: { title:"جوجه‌اردک زشت — تعاملی", sub:"نوشته هانس کریستین اندرسن", restart:"دوباره از اول شروع کن 🔁", next:"ادامه بده →", back:"◂ قبلی" },
+  en: { title:"The Ugly Duckling — Interactive", sub:"by Hans Christian Andersen", restart:"Start Over 🔁", next:"Continue →", back:"◂ Prev" }
+};
+
+/* ---------- Unified chibi bird (robust, front-facing, hard to misdraw) ---------- */
+function chibiBird(cx, cy, scale, bodyColor, opts){
+  opts = opts || {};
+  const neckLong = opts.neckLong || false;
+  const eyesClosed = opts.eyesClosed || false;
+  const tears = opts.tears || false;
+  const headY = neckLong ? -62 : -16;
+  const neck = neckLong
+    ? `<path d="M0,-14 Q16,-38 4,-58" stroke="${bodyColor}" stroke-width="11" fill="none" stroke-linecap="round"/>`
+    : "";
+  const eyes = eyesClosed
+    ? `<path d="M-6,${headY-2} q4,4 8,0" stroke="#2E3A3F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+       <path d="M2,${headY-2} q4,4 8,0" stroke="#2E3A3F" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="-3" cy="${headY-1}" r="1.9" fill="#2E3A3F"/><circle cx="7" cy="${headY-1}" r="1.9" fill="#2E3A3F"/>`;
+  const tearMark = tears
+    ? `<ellipse cx="-6" cy="${headY+7}" rx="2.2" ry="4.5" fill="#8FC1D6" opacity="0.85"/>`
+    : "";
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    ${neck}
+    <ellipse cx="0" cy="0" rx="22" ry="19" fill="${bodyColor}"/>
+    <circle cx="2" cy="${headY}" r="14.5" fill="${bodyColor}"/>
+    <polygon points="-6,${headY+5} 6,${headY+5} 0,${headY+12}" fill="#F0A93B"/>
+    ${eyes}
+    ${tearMark}
+    <ellipse cx="-19" cy="3" rx="7.5" ry="12" fill="${bodyColor}" opacity="0.82" transform="rotate(-18 -19 3)"/>
+    <ellipse cx="19" cy="3" rx="7.5" ry="12" fill="${bodyColor}" opacity="0.82" transform="rotate(18 19 3)"/>
+    <ellipse cx="-7" cy="20" rx="6" ry="3" fill="#F0A93B"/>
+    <ellipse cx="7" cy="20" rx="6" ry="3" fill="#F0A93B"/>
+  </g>`;
+}
+
+function flyingBird(cx,cy,scale,bodyColor){
+  const OUT = "#2E3A3F";
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    <path d="M-18,-4 Q-56,-34 -90,-10 Q-58,3 -22,9 Z" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <path d="M18,-4 Q56,-34 90,-10 Q58,3 22,9 Z" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <ellipse cx="0" cy="4" rx="23" ry="15" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <ellipse cx="4" cy="9" rx="14" ry="7" fill="#000000" opacity="0.08"/>
+    <ellipse cx="-7" cy="-2" rx="9" ry="6" fill="#FFFFFF" opacity="0.3"/>
+    <path d="M-20,9 L-33,19 L-16,14 Z" fill="${bodyColor}" stroke="${OUT}" stroke-width="2"/>
+    <path d="M14,-8 Q32,-32 20,-55" stroke="${OUT}" stroke-width="17" fill="none" stroke-linecap="round"/>
+    <path d="M14,-8 Q32,-32 20,-55" stroke="${bodyColor}" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <circle cx="19" cy="-56" r="10" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <ellipse cx="15" cy="-60" rx="4" ry="3" fill="#FFFFFF" opacity="0.4"/>
+    <polygon points="27,-56 38,-53 27,-50" fill="#F0932B" stroke="${OUT}" stroke-width="1.8"/>
+    <circle cx="23" cy="-58" r="2" fill="#2E3A3F"/>
+    <circle cx="24" cy="-59.5" r="0.8" fill="#fff"/>
+  </g>`;
+}
+
+function reflect(innerSvg, waterY){
+  return `<g transform="translate(0,${2*waterY}) scale(1,-1)" opacity="0.38">${innerSvg}</g>`;
+}
+function grad(id,c1,c2){ return `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/></linearGradient>`; }
+function sun(cx,cy,r,c){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`; }
+function snow(cx,cy,r){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>`; }
+function flower(cx,cy,c){ return `<g transform="translate(${cx},${cy})"><circle cx="0" cy="0" r="4" fill="${c}"/><circle cx="-5" cy="-2" r="3.2" fill="${c}"/><circle cx="5" cy="-2" r="3.2" fill="${c}"/><circle cx="0" cy="0" r="2" fill="#FFD873"/></g>`; }
+function fire(cx,cy,scale){
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    <path d="M0,20 Q-14,10 -6,-4 Q-2,2 0,-6 Q4,2 8,-4 Q16,10 0,20Z" fill="#F0A93B"/>
+    <path d="M0,16 Q-7,10 -2,0 Q1,4 2,-2 Q6,4 9,0 Q11,10 0,16Z" fill="#FFD873"/>
+  </g>`;
+}
+function handsHold(cx,cy,scale){
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    <path d="M-28,9 Q-28,-12 0,-12 Q28,-12 28,9 L22,20 Q0,27 -22,20 Z" fill="#E9B98A"/>
+  </g>`;
+}
+
+const GRAY = "#ADB7BA", YELLOW = "#FFE066", CREAM = "#FFF6E3", WHITE = "#FFFFFF";
+const VB_W = 480, VB_H = 280;
+
+function bird(cx, cy, scale, bodyColor, opts){
+  opts = opts || {};
+  const neckLong = opts.neckLong || false;
+  const eyesClosed = opts.eyesClosed || false;
+  const tears = opts.tears || false;
+  const flap = opts.flap || false;
+  const tilt = opts.tilt || 0;
+  const headY = neckLong ? -78 : -8;
+  const neck = neckLong
+    ? `<path d="M0,-18 Q22,-50 6,-76" stroke="#2E3A3F" stroke-width="20" fill="none" stroke-linecap="round"/>
+       <path d="M0,-18 Q22,-50 6,-76" stroke="${bodyColor}" stroke-width="15" fill="none" stroke-linecap="round"/>`
+    : "";
+  const eyeR = 5.2;
+  const eyes = eyesClosed
+    ? `<path d="M-10,${headY-3} q6,6 12,0" stroke="#2E3A3F" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+       <path d="M4,${headY-3} q6,6 12,0" stroke="#2E3A3F" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="-4" cy="${headY-2}" r="${eyeR}" fill="#2E3A3F"/><circle cx="-2" cy="${headY-4}" r="1.6" fill="#fff"/>
+       <circle cx="11" cy="${headY-2}" r="${eyeR}" fill="#2E3A3F"/><circle cx="13" cy="${headY-4}" r="1.6" fill="#fff"/>`;
+  const blush = `<ellipse cx="-14" cy="${headY+9}" rx="6" ry="4" fill="#F28FB8" opacity="0.75"/>
+                 <ellipse cx="22" cy="${headY+9}" rx="6" ry="4" fill="#F28FB8" opacity="0.75"/>`;
+  const tearMark = tears ? `<ellipse cx="-8" cy="${headY+14}" rx="3" ry="6" fill="#8FC1D6" opacity="0.9"/>` : "";
+  const wings = flap
+    ? `<path d="M-22,30 Q-60,14 -56,-30" fill="none" stroke="#2E3A3F" stroke-width="20" stroke-linecap="round"/>
+       <path d="M-22,30 Q-60,14 -56,-30" fill="none" stroke="${bodyColor}" stroke-width="15" stroke-linecap="round"/>
+       <path d="M22,30 Q60,14 56,-30" fill="none" stroke="#2E3A3F" stroke-width="20" stroke-linecap="round"/>
+       <path d="M22,30 Q60,14 56,-30" fill="none" stroke="${bodyColor}" stroke-width="15" stroke-linecap="round"/>`
+    : `<ellipse cx="-27" cy="42" rx="11" ry="18" fill="${bodyColor}" stroke="#2E3A3F" stroke-width="2.5" transform="rotate(-18 -27 42)"/>
+       <ellipse cx="27" cy="42" rx="11" ry="18" fill="${bodyColor}" stroke="#2E3A3F" stroke-width="2.5" transform="rotate(18 27 42)"/>`;
+  const shadow = flap ? "" : `<ellipse cx="0" cy="${neckLong?70:58}" rx="34" ry="8" fill="#2E3A3F" opacity="0.10"/>`;
+  const OUT = "#2E3A3F";
+  return `<g transform="translate(${cx},${cy}) rotate(${tilt}) scale(${scale})">
+    ${shadow}${neck}
+    <ellipse cx="0" cy="38" rx="30" ry="26" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <ellipse cx="6" cy="48" rx="22" ry="13" fill="#000000" opacity="0.10"/>
+    <ellipse cx="-9" cy="26" rx="13" ry="9" fill="#FFFFFF" opacity="0.30"/>
+    ${wings}
+    <circle cx="4" cy="${headY}" r="26" fill="${bodyColor}" stroke="${OUT}" stroke-width="3"/>
+    <ellipse cx="6" cy="${headY+12}" rx="18" ry="8" fill="#000000" opacity="0.08"/>
+    <ellipse cx="-6" cy="${headY-10}" rx="10" ry="7" fill="#FFFFFF" opacity="0.38"/>
+    <polygon points="-11,${headY+9} 14,${headY+9} 2,${headY+22}" fill="#F0932B" stroke="${OUT}" stroke-width="2"/>
+    <ellipse cx="-2" cy="${headY+12}" rx="4" ry="2" fill="#FFC773" opacity="0.7"/>
+    ${blush}${eyes}${tearMark}
+    <ellipse cx="-10" cy="62" rx="8" ry="4" fill="#F0932B" stroke="${OUT}" stroke-width="2"/>
+    <ellipse cx="10" cy="62" rx="8" ry="4" fill="#F0932B" stroke="${OUT}" stroke-width="2"/>
+  </g>`;
+}
+function ripple(cx,cy,w){
+  return `<g opacity="0.55">
+    <path d="M${cx-w},${cy} q${w*0.4},-7 ${w*0.8},0 t${w*0.8},0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M${cx-w*0.7},${cy+10} q${w*0.35},-6 ${w*0.7},0 t${w*0.7},0" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+  </g>`;
+}
+function motionLines(cx,cy,len,count,gap,angle){
+  let s = `<g transform="rotate(${angle} ${cx} ${cy})" opacity="0.5">`;
+  for(let i=0;i<count;i++){
+    s += `<line x1="${cx-30-i*gap}" y1="${cy+i*6-6}" x2="${cx-30-i*gap-len}" y2="${cy+i*6-6}" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  return s + `</g>`;
+}
+function reflect(innerSvg, waterY){
+  return `<g transform="translate(0,${2*waterY}) scale(1,-1)" opacity="0.32">${innerSvg}</g>`;
+}
+function grad(id,c1,c2){ return `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/></linearGradient>`; }
+function sun(cx,cy,r,c){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`; }
+function snow(cx,cy,r){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>`; }
+function flower(cx,cy,c,s){ s=s||1; return `<g transform="translate(${cx},${cy}) scale(${s})"><circle cx="0" cy="0" r="6" fill="${c}"/><circle cx="-8" cy="-3" r="5" fill="${c}"/><circle cx="8" cy="-3" r="5" fill="${c}"/><circle cx="0" cy="0" r="3" fill="#FFD873"/></g>`; }
+function fire(cx,cy,scale){
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    <path d="M0,24 Q-17,12 -7,-5 Q-2,3 0,-7 Q5,3 10,-5 Q19,12 0,24Z" fill="#F0A93B"/>
+    <path d="M0,19 Q-9,12 -3,0 Q1,5 2,-2 Q7,5 11,0 Q13,12 0,19Z" fill="#FFD873"/>
+  </g>`;
+}
+function handsHold(cx,cy,scale){
+  return `<g transform="translate(${cx},${cy}) scale(${scale})">
+    <path d="M-38,13 Q-38,-18 0,-18 Q38,-18 38,13 L30,28 Q0,38 -30,28 Z" fill="#E9B98A"/>
+  </g>`;
+}
+function ground(c){ return `<ellipse cx="${VB_W/2}" cy="${VB_H}" rx="300" ry="60" fill="${c}"/>`; }
+function sky(id,c1,c2){ return `<defs>${grad(id,c1,c2)}</defs><rect width="${VB_W}" height="${VB_H}" fill="url(#${id})"/>`; }
+function svgOpen(){ return `<svg class="stage-svg" viewBox="0 0 ${VB_W} ${VB_H}" xmlns="http://www.w3.org/2000/svg">`; }
+
+/* ---------- Scenes ---------- */
+function sceneHatch(){
+  return `${svgOpen()}${sky('ga','#FFD98A','#FFBE5C')}
+  ${sun(390,48,30,'#FFF4D6')}${ground('#9BD47E')}
+  ${bird(140,165,1.2,CREAM)}
+  ${bird(230,235,0.5,YELLOW)}${bird(260,240,0.46,YELLOW)}
+  ${bird(320,225,1.25,GRAY)}
+  </svg>`;
+}
+function sceneBigEgg(){
+  return `${svgOpen()}${sky('gb','#FFD98A','#FFBE5C')}
+  ${sun(390,48,30,'#FFF4D6')}${ground('#9BD47E')}
+  ${bird(135,165,1.05,CREAM)}
+  ${bird(205,235,0.48,YELLOW)}
+  ${bird(330,225,1.3,GRAY)}
+  </svg>`;
+}
+function sceneMock(){
+  return `${svgOpen()}${sky('gc','#FFD98A','#FFBE5C')}
+  ${sun(390,45,26,'#FFF4D6')}${ground('#9BD47E')}
+  <text x="105" y="108" font-size="38" text-anchor="middle">😮</text>
+  <text x="165" y="118" font-size="38" text-anchor="middle">😏</text>
+  ${bird(280,235,0.48,YELLOW)}
+  ${bird(335,220,1.45,GRAY)}
+  </svg>`;
+}
+function scenePondSwim(){
+  return `${svgOpen()}${sky('gd','#C3E4F5','#7BC4B0')}
+  ${sun(395,45,22,'#FFE49A')}${ground('#5FAFC4')}
+  ${ripple(135,210,36)}${ripple(210,235,26)}${ripple(325,228,46)}
+  ${bird(135,200,1,CREAM,{tilt:-5})}
+  ${bird(210,230,0.48,YELLOW,{tilt:6})}
+  ${bird(325,220,1.3,GRAY,{tilt:4})}
+  </svg>`;
+}
+function scenePondRejected(){
+  return `${svgOpen()}${sky('ge','#C3E4F5','#7BC4B0')}
+  ${sun(395,45,22,'#FFE49A')}${ground('#5FAFC4')}
+  ${ripple(330,225,48)}
+  ${bird(110,195,0.75,CREAM)}
+  ${bird(330,210,1.55,GRAY,{tears:true,tilt:3})}
+  </svg>`;
+}
+function scenePondChoice(swimming){
+  const actor = swimming
+    ? `${ripple(240,220,40)}${bird(240,210,1.4,GRAY,{tilt:5})}`
+    : bird(160,220,1.35,GRAY);
+  return `${svgOpen()}${sky('gf','#C3E4F5','#7BC4B0')}
+  ${sun(395,45,22,'#FFE49A')}${ground('#5FAFC4')}
+  ${actor}
+  </svg>`;
+}
+function sceneForestSwans(){
+  return `${svgOpen()}${sky('gg','#FFC374','#E08A2E')}
+  <ellipse cx="55" cy="245" rx="90" ry="150" fill="#D98A4A" opacity="0.5"/>
+  <ellipse cx="425" cy="245" rx="100" ry="160" fill="#C9763A" opacity="0.5"/>
+  ${motionLines(150,70,26,3,12,20)}
+  ${flyingBird(150,70,0.48,WHITE)}
+  ${motionLines(245,45,24,3,11,15)}
+  ${flyingBird(245,45,0.44,WHITE)}
+  ${bird(240,220,1.5,GRAY)}
+  </svg>`;
+}
+function sceneWinterAlone(){
+  return `${svgOpen()}${sky('gh','#C0DCEC','#8FB4CC')}
+  ${ground('#D8ECF5')}
+  ${snow(55,40,4)}${snow(115,72,3.5)}${snow(395,48,4)}${snow(430,88,3.5)}${snow(220,28,3.5)}
+  ${bird(240,218,1.55,GRAY)}
+  </svg>`;
+}
+function sceneWinterChoice(moving){
+  const actor = moving ? bird(270,205,1.4,GRAY) : bird(240,218,1.5,GRAY,{eyesClosed:true});
+  return `${svgOpen()}${sky('gi','#C0DCEC','#8FB4CC')}
+  ${ground('#D8ECF5')}
+  ${snow(60,38,4)}${snow(395,46,4)}${snow(430,86,3.5)}
+  ${actor}
+  </svg>`;
+}
+function sceneRescueWarm(){
+  return `${svgOpen()}${sky('gj','#F7C79E','#EEA366')}
+  ${fire(390,210,1.6)}
+  ${handsHold(200,210,1.5)}
+  ${bird(200,178,1.05,GRAY)}
+  </svg>`;
+}
+function sceneSpringLook(){
+  return `${svgOpen()}${sky('gk','#F2CCE3','#A8D9BE')}
+  ${sun(395,45,20,'#FFE49A')}${ground('#8BCBA4')}
+  ${flower(75,235,'#F3A6C9',1)}${flower(410,240,'#F3A6C9',1)}
+  ${ripple(150,225,30)}
+  ${bird(150,215,0.7,WHITE,{neckLong:true,tilt:-6})}
+  ${bird(260,220,1.45,GRAY)}
+  </svg>`;
+}
+function sceneLookChoice(closed){
+  const actor = bird(240,220,1.5,GRAY,{eyesClosed:closed});
+  return `${svgOpen()}${sky('gl','#F2CCE3','#A8D9BE')}
+  ${ground('#8BCBA4')}
+  ${actor}
+  </svg>`;
+}
+function sceneReveal(){
+  const waterY = 270;
+  return `${svgOpen()}${sky('gm','#F2CCE3','#A8D9BE')}
+  ${sun(395,45,20,'#FFE49A')}
+  <ellipse cx="240" cy="${waterY}" rx="300" ry="50" fill="#8BCBA4"/>
+  ${flower(75,230,'#F3A6C9',1)}${flower(410,235,'#F3A6C9',1)}
+  ${ripple(140,200,26)}
+  ${bird(140,198,0.68,WHITE,{neckLong:true,tilt:-6})}
+  ${reflect(bird(240,200,1.25,WHITE,{neckLong:true}), waterY)}
+  ${bird(240,200,1.25,GRAY)}
+  </svg>`;
+}
+function sceneFlyAway(){
+  return `${svgOpen()}${sky('gn','#C3E4F5','#CDEADB')}
+  <ellipse cx="100" cy="60" rx="26" ry="15" fill="#fff" opacity="0.8"/>
+  <ellipse cx="390" cy="48" rx="22" ry="13" fill="#fff" opacity="0.8"/>
+  ${motionLines(170,150,46,4,14,25)}
+  ${flyingBird(240,140,1.55,WHITE)}
+  </svg>`;
+}
+
+
+const scenes = {
+  p1: { step:1, badge:{fa:"شروع قصه",en:"The Beginning"}, img: sceneHatch(),
+    text:{fa:"تابستان بود. توی یه مزرعه‌ی آفتابی، خانم اردک روی تخم‌هاش نشسته بود. یکی‌یکی تخم‌ها شکستن، ولی یه تخم بزرگ دیرتر باز شد. یه جوجه‌ی خاکستری و دست‌وپاچلفتی بیرون اومد، خیلی با بقیه فرق داشت.",
+        en:"It was summer. On a sunny farm, the mother duck sat on her eggs. One by one the eggs cracked, but one big egg opened later. Out came a gray, clumsy duckling, very different from the rest."},
+    nextScene:"p2" },
+  p2: { step:2, badge:{fa:"واکنش حیوان‌ها",en:"Reactions"}, img: sceneMock(),
+    text:{fa:"بقیه حیوان‌های مزرعه گفتن: «این یکی چقدر بزرگ و عجیبه!»",
+          en:"The other animals on the farm said, \"How big and strange this one is!\""},
+    nextScene:"p3" },
+  p3: { step:3, badge:{fa:"کنار برکه",en:"At the Pond"}, img: scenePondSwim(),
+    text:{fa:"خانم اردک بچه‌هاش رو برد کنار برکه. همه‌ی جوجه‌ها خوب شنا کردن، حتی اون جوجه‌ی خاکستری بزرگ. ولی مرغ‌ها و اردک‌های دیگه بازم بهش می‌خندیدن و رهاش نمی‌کردن، چون شکلش فرق داشت.",
+          en:"The mother duck took her children to the pond. All the ducklings swam well, even the big gray one. But the other hens and ducks laughed at him and wouldn't let him be, because he looked different."},
+    nextScene:"p4" },
+  p4: { step:4, badge:{fa:"طرد شدن",en:"Rejected"}, img: scenePondRejected(),
+    text:{fa:"می‌گفتن: «برو، تو خیلی زشتی، حق نداری اینجا بمونی!» جوجه‌ی بیچاره خیلی غمگین و تنها شد.",
+          en:"They said, \"Go away, you're too ugly, you have no right to stay here!\" The poor duckling became very sad and lonely."},
+    nextScene:"d1" },
+
+  d1: { step:5, badge:{fa:"نقطه‌ی تصمیم ۱",en:"Decision Point 1"}, img: scenePondRejected(),
+    text:{fa:"جوجه کنار برکه ایستاده بود، قلبش از این حرف‌ها شکسته بود.",
+          en:"The duckling stood by the pond, his heart broken by their words."},
+    question:{fa:"جوجه الان چیکار کنه؟", en:"What should the duckling do now?"},
+    choices:[
+      { label:{fa:"یه بار دیگه شنا کنه و نشونشون بده چقدر خوبه", en:"Swim once more and show them how good he is"}, next:"d1a" },
+      { label:{fa:"بدون هیچ حرفی آروم کنار بره", en:"Quietly move away without a word"}, next:"d1b" }
+    ] },
+  d1a: { step:6, badge:{fa:"تلاش دوباره",en:"Trying Again"}, img: scenePondChoice(true),
+    text:{fa:"جوجه دوباره شنا کرد، تند و قشنگ. ولی بقیه بازم بی‌توجهی کردن.",
+          en:"The duckling swam again, fast and gracefully. But the others still paid no attention."},
+    nextScene:"d2" },
+  d1b: { step:6, badge:{fa:"فاصله گرفتن",en:"Moving Away"}, img: scenePondChoice(false),
+    text:{fa:"جوجه سرش رو پایین انداخت و آروم از جمع فاصله گرفت.",
+          en:"The duckling lowered his head and quietly moved away from the group."},
+    nextScene:"d2" },
+
+  d2: { step:7, badge:{fa:"نقطه‌ی تصمیم ۲",en:"Decision Point 2"}, img: scenePondRejected(),
+    text:{fa:"جوجه فهمید دیگه نمی‌تونه اینجا بمونه. با خودش فکر کرد...",
+          en:"The duckling realized he couldn't stay here anymore. He thought to himself..."},
+    question:{fa:"جوجه چیکار کنه؟", en:"What should the duckling do?"},
+    choices:[
+      { label:{fa:"«برم ببینم چی پیش میاد»", en:"\"I'll go and see what happens\""}, next:"d2a" },
+      { label:{fa:"«شاید بهتره یه‌کم دیگه اینجا بمونم و صبر کنم»", en:"\"Maybe I should stay a little longer and wait\""}, next:"d2b" }
+    ] },
+  d2a: { step:8, badge:{fa:"قدم اول",en:"The First Step"}, img: sceneForestSwans(),
+    text:{fa:"با همین فکر، قدم‌های محکم‌تری برداشت و به سمت ناشناخته‌ها حرکت کرد.",
+          en:"With that thought, he took firmer steps and headed toward the unknown."},
+    nextScene:"p5" },
+  d2b: { step:8, badge:{fa:"چند روز صبر",en:"A Few More Days"}, img: sceneForestSwans(),
+    text:{fa:"چند روز دیگه موند و صبر کرد، ولی چیزی عوض نشد. بالاخره فهمید باید بره.",
+          en:"He stayed a few more days and waited, but nothing changed. He finally realized he had to go."},
+    nextScene:"p5" },
+
+  p5: { step:9, badge:{fa:"سفر پاییزی",en:"Autumn Journey"}, img: sceneForestSwans(),
+    text:{fa:"تصمیم گرفت از مزرعه بره و یه جایی رو پیدا کنه که قبولش کنن. از دشت‌ها و جنگل‌ها رد شد. پاییز آروم‌آروم از راه رسید. یه روز صبح زود یه دسته پرنده‌ی سفید و زیبا رو دید که توی آسمون پرواز می‌کردن. باوقار و آزاد. جوجه یه حس عجیب توی دلش احساس کرد، اما دلیلش رو نمی‌دونست.",
+          en:"He decided to leave the farm and find a place where he would be accepted. He passed through fields and forests. Autumn slowly arrived. One early morning, he saw a flock of beautiful white birds flying in the sky. Graceful and free. The duckling felt a strange feeling in his heart, but he didn't know why."},
+    nextScene:"p6" },
+
+  p6: { step:10, badge:{fa:"زمستان سخت",en:"Harsh Winter"}, img: sceneWinterAlone(),
+    text:{fa:"زمستون از راه رسید، سرد و سخت و برفی. جوجه تنها بود، گرسنه و خسته. یه برکه‌ی یخ‌زده پیدا کرد. کنار برکه نشست تا از آفتاب بعد از برف کمی گرم بشه،",
+          en:"Winter arrived, cold and harsh and snowy. The duckling was alone, hungry, and tired. He found a frozen pond. He sat beside it to warm up a little in the sun after the snow,"},
+    nextScene:"d3" },
+
+  d3: { step:11, badge:{fa:"نقطه‌ی تصمیم ۳",en:"Decision Point 3"}, img: sceneWinterAlone(),
+    text:{fa:"برف بیشتر و بیشتر می‌بارید. جوجه حس کرد توی برف گیر افتاده و بدنش داره کرخت می‌شه.",
+          en:"The snow kept falling harder. The duckling felt stuck in the snow, his body growing numb."},
+    question:{fa:"جوجه چیکار کنه؟", en:"What should the duckling do?"},
+    choices:[
+      { label:{fa:"با آخرین توانش بلند بشه و دنبال پناهگاه بگرده", en:"Use his last strength to get up and search for shelter"}, next:"d3a" },
+      { label:{fa:"همون‌جا بمونه و چشماش رو کمی ببنده", en:"Stay right there and close his eyes for a moment"}, next:"d3b" }
+    ] },
+  d3a: { step:12, badge:{fa:"تلاش برای رفتن",en:"Trying to Move"}, img: sceneWinterChoice(true),
+    text:{fa:"جوجه با آخرین توانش چند قدم برداشت.",
+          en:"The duckling took a few steps with his last strength."},
+    nextScene:"p7" },
+  d3b: { step:12, badge:{fa:"لحظه‌ای استراحت",en:"A Moment of Rest"}, img: sceneWinterChoice(false),
+    text:{fa:"جوجه همون‌جا موند و چشماش رو بست تا کمی نیرو بگیره.",
+          en:"The duckling stayed right there and closed his eyes to gather a little strength."},
+    nextScene:"p7" },
+
+  p7: { step:13, badge:{fa:"نجات",en:"Rescued"}, img: sceneRescueWarm(),
+    text:{fa:"اما نزدیک بود همون‌جا یخ بزنه. به‌قدری بی‌حال شده بود که صدای قدم‌های کشاورز رو نشنید. وقتی به خودش اومد، تو آغوش گرم یه کشاورز مهربون بود، تو خونه‌ش و کنار بخاری.",
+          en:"But he nearly froze right there. He had grown so weak that he didn't even hear the farmer's footsteps. When he came to himself, he was in the warm arms of a kind farmer, inside his house, beside the fire."},
+    nextScene:"p8" },
+
+  p8: { step:14, badge:{fa:"بازگشت بهار",en:"Spring Return"}, img: sceneSpringLook(),
+    text:{fa:"بهار اومد. جوجه که حالا بزرگ شده بود، تصمیم گرفت به همون برکه برگرده. دوباره اون پرنده‌های زیبا و باوقار رو دید. غمگین و بی‌حوصله کنار آب ایستاد و سرش رو پایین آورد. منتظر بود همون تصویر خاکستری و زشت رو ببینه.",
+          en:"Spring came. The duckling, who had now grown up, decided to return to that same pond. He saw those beautiful, graceful birds again. Sad and listless, he stood by the water and lowered his head. He expected to see the same gray, ugly reflection."},
+    nextScene:"p9" },
+
+  p9: { step:15, badge:{fa:"کشف بزرگ",en:"The Big Discovery"}, img: sceneReveal(),
+    text:{fa:"ولی آب یه چیز دیگه نشونش داد: اون دیگه یه جوجه‌ی خاکستری و دست‌وپاچلفتی نبود. اون تبدیل به یه قوی زیبا و سفید شده بود! قوهای دیگه با گرمی ازش استقبال کردن، و بچه‌هایی که کنار برکه بودن به هم می‌گفتن: «نگاه کنید، چه قوی قشنگی! انگار تازه اومده به برکه!»",
+          en:"But the water showed him something else: he was no longer a gray, clumsy duckling. He had become a beautiful white swan! The other swans welcomed him warmly, and the children who were by the pond said to one another, \"Look, what a beautiful swan! It's as if he's just arrived at the pond!\""},
+    nextScene:"p10" },
+  p10: { step:16, badge:{fa:"پایان",en:"The End"}, img: sceneFlyAway(),
+    text:{fa:"قو شادی تو دلش موج می‌زد چون متوجه شده بود به اونچه که باید باشه رسیده. بال‌های بزرگ و زیباش رو باز کرد و به سمت آسمون آبی پرواز کرد.\n\nپایان.",
+          en:"Joy surged through the swan's heart, for he realized he had become what he was meant to be. He spread his large, beautiful wings and flew up toward the blue sky.\n\nThe End."},
+    isEnd:true }
+};
+
+let current = "p1";
+let historyStack = [];
+function toggleLang(){
+  lang = (lang === "fa") ? "en" : "fa";
+  document.documentElement.lang = lang;
+  document.documentElement.dir = (lang === "fa") ? "rtl" : "ltr";
+  document.getElementById("langBtn").textContent = (lang === "fa") ? "EN" : "فا";
+  render();
+}
+function render(){
+  const t = ui[lang];
+  document.getElementById("titleBox").innerHTML = `${t.title}<span class="sub">${t.sub}</span>`;
+  const s = scenes[current];
+  const pct = Math.round((s.step / TOTAL_STEPS) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = `${s.step} / ${TOTAL_STEPS}`;
+
+  const card = document.getElementById("card");
+  let html = s.img;
+  html += `<div class="body-pad">`;
+  html += `<div class="back-row"><button class="backBtn" onclick="goBack()" ${historyStack.length===0?'disabled style="visibility:hidden"':''}>${t.back}</button></div>`;
+  html += `<p class="story-text">${s.text[lang].replace(/\n/g,"<br>")}</p>`;
+  if (s.choices){
+    html += `<p class="question">${s.question[lang]}</p>`;
+    html += `<div class="choices">`;
+    s.choices.forEach((c, i) => { html += `<button class="choice${i===1?' alt':''}" onclick="go('${c.next}')">${c.label[lang]}</button>`; });
+    html += `</div>`;
+  } else if (s.isEnd) {
+    html += `<div class="next-wrap"><button class="next restart" onclick="restart()">${t.restart}</button></div>`;
+  } else {
+    html += `<div class="next-wrap"><button class="next" onclick="go('${s.nextScene}')">${t.next}</button></div>`;
+  }
+  html += `</div>`;
+  card.innerHTML = html;
+}
+function go(id){ historyStack.push(current); current = id; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+function goBack(){ if(historyStack.length>0){ current = historyStack.pop(); render(); window.scrollTo({top:0, behavior:"smooth"}); } }
+function restart(){ current = "p1"; historyStack = []; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+render();
+</script>
+</body>
+</html>
